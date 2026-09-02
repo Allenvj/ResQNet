@@ -1,0 +1,12 @@
+### Register Citizen
+
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "citizen@resqnet.com",
+  "password": "Password123!",
+  "fullName": "Test Citizen",
+  "phoneNumber": "9876543210",
+  "requestedRole": "CITIZEN"
+}
