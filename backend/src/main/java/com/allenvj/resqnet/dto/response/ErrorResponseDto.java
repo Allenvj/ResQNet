@@ -1,19 +1,13 @@
 package com.allenvj.resqnet.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 
-import java.time.Instant;
-
-@Getter
 @Builder
-@AllArgsConstructor
-public class ErrorResponseDto {
-
-    private Instant timestamp;
-    private int status;
-    private String error;
-    private String message;
-    private String path;
+public record ErrorResponseDto(
+        String timestamp,
+        int status,
+        String error,
+        String message,
+        String path
+) {
 }
