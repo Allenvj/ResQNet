@@ -1,6 +1,8 @@
 package com.allenvj.resqnet.controller;
 
+import com.allenvj.resqnet.dto.request.LoginRequestDto;
 import com.allenvj.resqnet.dto.request.RegisterRequestDto;
+import com.allenvj.resqnet.dto.response.AuthResponseDto;
 import com.allenvj.resqnet.dto.response.UserResponseDto;
 import com.allenvj.resqnet.service.AuthService;
 import jakarta.validation.Valid;
@@ -23,11 +25,19 @@ public class AuthController {
     public ResponseEntity<UserResponseDto> register(
             @Valid @RequestBody RegisterRequestDto request
     ) {
-
         UserResponseDto response = authService.register(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(
+            @Valid @RequestBody LoginRequestDto request
+    ) {
+        AuthResponseDto response = authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,16 +1,17 @@
 package com.allenvj.resqnet.dto.response;
 
-import lombok.AllArgsConstructor;
+import com.allenvj.resqnet.enums.Role;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
+import java.util.UUID;
+
 @Builder
-@AllArgsConstructor
-public class AuthResponseDto {
-
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType;
-    private UserResponseDto user;
+public record AuthResponseDto(
+        String accessToken,
+        String refreshToken,
+        UUID id,
+        String email,
+        String fullName,
+        Role role
+) {
 }
