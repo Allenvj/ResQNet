@@ -1,6 +1,7 @@
 package com.allenvj.resqnet.service;
 
 import com.allenvj.resqnet.dto.request.IncidentRequestDto;
+import com.allenvj.resqnet.dto.request.IncidentStatusUpdateDto;
 import com.allenvj.resqnet.dto.response.IncidentResponseDto;
 import com.allenvj.resqnet.entity.Incident;
 import com.allenvj.resqnet.entity.User;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,17 @@ public class IncidentService {
                 .stream()
                 .map(this::mapToResponseDto)
                 .toList();
+    }
+
+    @Transactional
+    public IncidentResponseDto updateIncidentStatus(UUID id, IncidentStatusUpdateDto request) {
+        Incident incident = incidentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Incident not found with ID: " + id));
+
+        incident.setStatus(request.status());
+        Incident updatedIncident = incidentRepository.save(incident);
+
+        return mapToResponseDto(updatedIncident);
     }
 
     private IncidentResponseDto mapToResponseDto(Incident incident) {
