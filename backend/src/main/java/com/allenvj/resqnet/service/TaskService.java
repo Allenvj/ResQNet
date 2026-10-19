@@ -1,15 +1,18 @@
 package com.allenvj.resqnet.service;
 
 import com.allenvj.resqnet.dto.request.TaskRequestDto;
+import com.allenvj.resqnet.dto.request.TaskStatusUpdateDto;
 import com.allenvj.resqnet.dto.response.TaskResponseDto;
 import com.allenvj.resqnet.entity.Incident;
 import com.allenvj.resqnet.entity.Task;
 import com.allenvj.resqnet.entity.User;
+import com.allenvj.resqnet.enums.Role;
 import com.allenvj.resqnet.enums.TaskStatus;
 import com.allenvj.resqnet.repository.IncidentRepository;
 import com.allenvj.resqnet.repository.TaskRepository;
 import com.allenvj.resqnet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +64,24 @@ public class TaskService {
                 .stream()
                 .map(this::mapToResponseDto)
                 .toList();
+    }
+
+    @Transactional
+    public TaskResponseDto updateTaskStatus(UUID taskId, TaskStatusUpdateDto request, User currentUser) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found with ID: " + taskId));
+
+        boolean isManagerOrAdmin = currentUser.getRole() == Role.DISASTER_MANAGER || currentUser.getRole() == Role.ADMIN;
+        boolean isAssignee = task.getAssignee() != null && task.getAssignee().getId().equals(currentUser.getId());
+
+        if (!isManagerOrAdmin && !isAssignee) {
+            throw new AccessDeniedException("You can only update tasks assigned to you");
+        }
+
+        task.setStatus(request.status());
+        Task updatedTask = taskRepository.save(task);
+
+        return mapToResponseDto(updatedTask);
     }
 
     private TaskResponseDto mapToResponseDto(Task task) {
