@@ -1,0 +1,1076 @@
+<!-- =========================================================================
+     ResQNet Operational Mission Command Layout
+     Wireframe & Visual Design: Google Stitch MCP Payload
+     Retains dark-navy sidebar (#0B1325), White/Light theme central workspace
+     ========================================================================= -->
+
+<!-- Tactical Alert / Notification Toast -->
+@if (notificationMessage()) {
+  <div class="fixed top-20 right-6 z-50 animate-bounce transition-all">
+    <div
+      class="flex items-center gap-3 px-4 py-3 rounded-lg shadow-2xl text-on-primary font-label-md text-label-md uppercase tracking-wider border"
+      [ngClass]="{
+        'bg-error-container text-on-error-container border-error': notificationType() === 'alert',
+        'bg-primary-container text-on-primary border-primary': notificationType() === 'warning',
+        'bg-emerald-600 text-white border-emerald-400': notificationType() === 'success'
+      }">
+      <span class="material-symbols-outlined text-[20px]">
+        @if (notificationType() === 'alert') { crisis_alert }
+        @else if (notificationType() === 'warning') { warning }
+        @else { check_circle }
+      </span>
+      <span>{{ notificationMessage() }}</span>
+      <button (click)="notificationMessage.set(null)" class="ml-2 hover:opacity-75">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- DARK-NAVY LEFT NAVIGATION SIDEBAR (Fixed w-64, #0B1325) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#0B1325] border-r-[1.5px] border-[#1E293B] z-50 flex flex-col justify-between select-none">
+  <div class="flex flex-col">
+    <!-- Brand Title Header -->
+    <div class="h-16 px-space-md flex items-center gap-space-sm border-b-[1.5px] border-[#1E293B]">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-md">
+        <span class="material-symbols-outlined text-[20px]">shield</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="font-title-md text-title-md font-bold uppercase tracking-wider text-on-primary leading-tight">ResQNet</span>
+        <span class="font-label-sm text-label-sm uppercase tracking-widest text-[#94A3B8]">Console Grid</span>
+      </div>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="p-space-sm">
+      <div class="px-space-sm py-2 text-[10px] font-bold text-[#64748B] uppercase tracking-widest">
+        Mission Command
+      </div>
+      <nav class="flex flex-col gap-1">
+        <!-- Overview -->
+        <button
+          type="button"
+          (click)="setView('tracker')"
+          [class]="currentView() === 'overview' ? 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm transition-colors uppercase tracking-wider bg-[#1E293B] text-on-primary font-bold border-l-2 border-primary text-left w-full' : 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm text-[#CBD5E1] hover:bg-[#1E293B] hover:text-on-primary transition-colors font-label-lg text-label-lg uppercase tracking-wider text-left w-full'">
+          <span class="material-symbols-outlined text-[18px]">home</span>
+          <span>Overview</span>
+        </button>
+
+        <!-- Report Incident / Dispatch Form -->
+        <button
+          type="button"
+          (click)="setView('dispatch')"
+          [class]="currentView() === 'dispatch' ? 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm transition-colors uppercase tracking-wider bg-[#1E293B] text-on-primary font-bold border-l-2 border-primary text-left w-full' : 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm text-[#CBD5E1] hover:bg-[#1E293B] hover:text-on-primary transition-colors font-label-lg text-label-lg uppercase tracking-wider text-left w-full'">
+          <span class="material-symbols-outlined text-[18px] text-amber-400">emergency</span>
+          <span class="flex-1">Report Incident</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">NEW</span>
+        </button>
+
+        <!-- Incident Tracker / Active Incident Roster -->
+        <button
+          type="button"
+          (click)="setView('tracker')"
+          [class]="currentView() === 'tracker' ? 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm transition-colors uppercase tracking-wider bg-[#1E293B] text-on-primary font-bold border-l-2 border-primary text-left w-full' : 'flex items-center gap-space-sm px-space-sm py-2 rounded-sm text-[#CBD5E1] hover:bg-[#1E293B] hover:text-on-primary transition-colors font-label-lg text-label-lg uppercase tracking-wider text-left w-full'">
+          <span class="material-symbols-outlined text-[18px] text-primary">radar</span>
+          <span class="flex-1">Incident Tracker</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary-fixed font-bold">{{ incidents().length }}</span>
+        </button>
+
+        <!-- Units & Assets -->
+        <button
+          type="button"
+          (click)="setView('tracker')"
+          class="flex items-center gap-space-sm px-space-sm py-2 rounded-sm text-[#CBD5E1] hover:bg-[#1E293B] hover:text-on-primary transition-colors font-label-lg text-label-lg uppercase tracking-wider text-left w-full">
+          <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+          <span>Units &amp; Assets</span>
+        </button>
+
+        <!-- Field Broadcasts -->
+        <button
+          type="button"
+          (click)="triggerEasBroadcast()"
+          class="flex items-center gap-space-sm px-space-sm py-2 rounded-sm text-[#CBD5E1] hover:bg-[#1E293B] hover:text-on-primary transition-colors font-label-lg text-label-lg uppercase tracking-wider text-left w-full">
+          <span class="material-symbols-outlined text-[18px]">campaign</span>
+          <span>Broadcasts</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Bottom Sector Status & Profile Card -->
+  <div class="p-space-sm border-t-[1.5px] border-[#1E293B] bg-[#070D1A]">
+    <div class="flex items-center justify-between mb-2">
+      <span class="font-label-sm text-label-sm text-[#94A3B8] uppercase">Sector Status</span>
+      <span class="font-label-sm text-label-sm text-emerald-400 font-bold uppercase flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        Secure
+      </span>
+    </div>
+    <div class="flex items-center gap-space-sm">
+      <div class="w-8 h-8 rounded-full bg-slate-700 border border-[#38BDF8] flex items-center justify-center text-cyan-300 font-bold text-xs">
+        CC
+      </div>
+      <div class="flex flex-col truncate">
+        <span class="font-label-md text-label-md text-on-primary font-semibold truncate">Cmdr Collins</span>
+        <span class="font-label-sm text-label-sm text-[#64748B] truncate">Sector 4 Control</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOP FIXED OPERATIONAL HEADER (Fixed, left-64 right-0, #0B1325) -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-[#0B1325] border-b-[1.5px] border-[#1E293B] z-40 flex items-center justify-between px-gutter shadow-[0_4px_0_0_#0B1325] select-none">
+  <!-- Left Header Status Pill -->
+  <div class="flex items-center gap-space-md">
+    <div class="flex items-center gap-space-sm bg-[#131E36] px-space-sm py-1 rounded border border-[#1E293B]">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      </span>
+      <span class="font-label-sm text-label-sm text-[#F1F5F9] uppercase tracking-wider font-semibold">OMNI-ACTIVE</span>
+      <span class="font-label-sm text-label-sm text-[#64748B]">|</span>
+      <span class="font-code-md text-code-md text-[#38BDF8]">{{ dashboardStats().latencyMs }}ms</span>
+      <span class="font-label-sm text-label-sm text-[#64748B]">|</span>
+      <span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+        {{ dashboardStats().systemOperationalStatus }}
+      </span>
+    </div>
+    <!-- Live Clocks -->
+    <span class="font-code-md text-code-md text-[#94A3B8] hidden md:inline-block">
+      {{ utcClock() }} | {{ pstClock() }}
+    </span>
+  </div>
+
+  <!-- Right Header Controls -->
+  <div class="flex items-center gap-space-md">
+    <!-- View Switcher Pills -->
+    <div class="flex items-center bg-[#131E36] p-0.5 rounded border border-[#1E293B]">
+      <button
+        type="button"
+        (click)="setView('tracker')"
+        class="px-3 py-1 rounded text-xs font-bold uppercase transition-all"
+        [class]="currentView() === 'tracker' ? 'bg-primary text-white shadow' : 'text-[#CBD5E1] hover:text-white'">
+        Active Roster
+      </button>
+      <button
+        type="button"
+        (click)="setView('dispatch')"
+        class="px-3 py-1 rounded text-xs font-bold uppercase transition-all"
+        [class]="currentView() === 'dispatch' ? 'bg-primary text-white shadow' : 'text-[#CBD5E1] hover:text-white'">
+        Dispatch Form
+      </button>
+    </div>
+
+    <!-- Hotline Direct Trigger -->
+    <button
+      type="button"
+      (click)="setView('dispatch')"
+      class="flex items-center gap-space-xs px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-[#0B1325] border-[1.5px] border-amber-600 rounded font-label-lg text-label-lg font-bold tracking-wide uppercase shadow-[0_2px_0_0_#92400E] active:translate-y-0.5 transition-all">
+      <span class="material-symbols-outlined text-[18px]">phone_in_talk</span>
+      <span>HOTLINE: 1-800-RESQ-NET</span>
+    </button>
+
+    <div class="h-6 w-[1.5px] bg-[#1E293B]"></div>
+
+    <!-- Commander User Widget -->
+    <div class="flex items-center gap-space-sm">
+      <div class="flex flex-col text-right">
+        <span class="font-label-lg text-label-lg text-on-primary leading-tight font-semibold">Commander Collins</span>
+        <span class="font-label-sm text-label-sm text-[#94A3B8] leading-tight">Sector 4 Lead</span>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-slate-700 border-[1.5px] border-[#38BDF8] flex items-center justify-center text-cyan-300 font-bold text-xs">
+        CC
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- =========================================================================
+     MAIN CENTRAL WORKSPACE (White/Light Theme: bg-surface, text-on-surface)
+     ========================================================================= -->
+<div class="pl-64">
+  <main class="relative pt-16 bg-surface min-h-screen text-on-surface">
+
+    <!-- =====================================================================
+         VIEW 1: ACTIVE INCIDENT ROSTER (INCIDENT TRACKER VIEW)
+         ===================================================================== -->
+    @if (currentView() === 'tracker') {
+      <div class="flex flex-col w-full">
+        <!-- Top Operational KPI Metric Bar -->
+        <div class="px-gutter py-space-md bg-surface-container-lowest border-b border-[#1E293B]/10 shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+            
+            <!-- Metric 1: Active Incidents -->
+            <div class="flex items-center gap-space-sm p-3 bg-surface-container-low rounded-lg border border-surface-container-highest">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">warning</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">Active Incidents</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="font-headline-md text-headline-md font-black text-on-surface">{{ dashboardStats().totalActiveIncidents }}</span>
+                  <span class="font-label-sm text-label-sm font-semibold text-primary">{{ dashboardStats().activeIncidentsDelta }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metric 2: Critical Alarms -->
+            <div class="flex items-center gap-space-sm p-3 bg-error-container/30 rounded-lg border border-error-container">
+              <div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[24px]">crisis_alert</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-on-error-container uppercase font-bold tracking-wider">Critical Alarms</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="font-headline-md text-headline-md font-black text-primary">0{{ dashboardStats().criticalSeverityCount }}</span>
+                  <span class="font-label-sm text-label-sm font-bold text-on-error-container">{{ dashboardStats().criticalDefconLevel }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metric 3: Units Deployed -->
+            <div class="flex items-center gap-space-sm p-3 bg-surface-container-low rounded-lg border border-surface-container-highest">
+              <div class="w-10 h-10 rounded-lg bg-secondary-container/60 text-secondary flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">Units Deployed</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="font-headline-md text-headline-md font-black text-on-surface">{{ dashboardStats().unitsDeployedCount }}</span>
+                  <span class="font-label-sm text-label-sm font-semibold text-secondary">{{ dashboardStats().unitsDeployedPercent }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metric 4: Evacuation Zones -->
+            <div class="flex items-center gap-space-sm p-3 bg-surface-container-low rounded-lg border border-surface-container-highest">
+              <div class="w-10 h-10 rounded-lg bg-tertiary-container/20 text-tertiary flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">sensor_occupied</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">Evacuation Zones</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="font-headline-md text-headline-md font-black text-on-surface">0{{ dashboardStats().evacuationZonesCount }}</span>
+                  <span class="font-label-sm text-label-sm font-semibold text-tertiary truncate max-w-[100px]" [title]="dashboardStats().evacuationZonesSector">
+                    {{ dashboardStats().evacuationZonesSector }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metric 5: Avg Response -->
+            <div class="flex items-center gap-space-sm p-3 bg-surface-container-low rounded-lg border border-surface-container-highest">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">timer</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">Avg Response</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="font-headline-md text-headline-md font-black text-on-surface">{{ dashboardStats().avgResponseTime }}</span>
+                  <span class="font-label-sm text-label-sm font-semibold text-emerald-600">{{ dashboardStats().avgResponseDelta }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Main Workspace: Data Table + Detail Inspector Grid -->
+        <div class="p-gutter grid grid-cols-12 gap-gutter items-start">
+          
+          <!-- Primary Column: Active Incident Roster Data Table (8 cols on XL) -->
+          <div class="col-span-12 xl:col-span-8 flex flex-col gap-space-md">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high overflow-hidden">
+              
+              <!-- Header & Search Controls -->
+              <div class="p-space-md border-b border-surface-container-high flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[22px]">format_list_bulleted</span>
+                    <h2 class="font-title-md text-title-md font-bold uppercase tracking-wide text-on-surface">
+                      Active Incident Roster
+                    </h2>
+                  </div>
+                  <p class="font-body-sm text-body-sm text-secondary mt-0.5">
+                    Live Operational Incident Grid &amp; Priority Triage Queue
+                  </p>
+                </div>
+
+                <!-- Search Input Bar -->
+                <div class="flex items-center gap-2">
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-secondary">search</span>
+                    <input
+                      type="text"
+                      [value]="searchQuery()"
+                      (input)="onSearchInput($event)"
+                      placeholder="Search ID, location, or tag..."
+                      class="bg-surface-container-low text-on-surface text-body-sm font-body-sm pl-9 pr-3 py-1.5 rounded-lg border border-surface-container-highest focus:outline-none focus:border-primary w-64 transition-all" />
+                  </div>
+                  <button
+                    type="button"
+                    (click)="setView('dispatch')"
+                    class="flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-container text-on-primary rounded font-label-sm text-label-sm font-bold uppercase tracking-wider shadow-sm transition-all">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    <span>New Call</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter Category Tabs -->
+              <div class="px-space-md py-2 bg-surface-container-low/50 border-b border-surface-container-high flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    (click)="setFilterTab('ALL')"
+                    [class]="activeFilterTab() === 'ALL' ? 'bg-on-surface text-on-primary px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold shadow-sm' : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold border border-surface-container-high transition-colors'">
+                    All Incidents ({{ incidents().length }})
+                  </button>
+                  <button
+                    type="button"
+                    (click)="setFilterTab('CRITICAL')"
+                    [class]="activeFilterTab() === 'CRITICAL' ? 'bg-on-surface text-on-primary px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold shadow-sm' : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold border border-surface-container-high transition-colors'">
+                    Critical (Code Red)
+                  </button>
+                  <button
+                    type="button"
+                    (click)="setFilterTab('SERIOUS')"
+                    [class]="activeFilterTab() === 'SERIOUS' ? 'bg-on-surface text-on-primary px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold shadow-sm' : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold border border-surface-container-high transition-colors'">
+                    Serious (Amber)
+                  </button>
+                  <button
+                    type="button"
+                    (click)="setFilterTab('ROUTINE')"
+                    [class]="activeFilterTab() === 'ROUTINE' ? 'bg-on-surface text-on-primary px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold shadow-sm' : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold border border-surface-container-high transition-colors'">
+                    Routine (Blue)
+                  </button>
+                  <button
+                    type="button"
+                    (click)="setFilterTab('SUPPRESSION')"
+                    [class]="activeFilterTab() === 'SUPPRESSION' ? 'bg-on-surface text-on-primary px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold shadow-sm' : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest px-3 py-1 rounded-md text-label-sm font-label-sm uppercase font-bold border border-surface-container-high transition-colors'">
+                    Active Suppression
+                  </button>
+                </div>
+                <span class="font-code-md text-code-md text-secondary text-[11px]">
+                  TELEMETRY SYNCED 100%
+                </span>
+              </div>
+
+              <!-- Clean Active Incident Roster Data Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-wider border-b border-surface-container-high">
+                      <th class="p-3 pl-4">Incident ID</th>
+                      <th class="p-3">Severity</th>
+                      <th class="p-3">Incident &amp; Location</th>
+                      <th class="p-3">Elapsed</th>
+                      <th class="p-3">Units</th>
+                      <th class="p-3">Stage</th>
+                      <th class="p-3 pr-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm">
+                    @for (incident of filteredIncidents(); track incident.id) {
+                      <tr
+                        (click)="selectIncident(incident)"
+                        class="transition-colors cursor-pointer"
+                        [ngClass]="{
+                          'bg-error-container/20 hover:bg-error-container/30 border-l-4 border-l-primary': selectedIncident().id === incident.id && incident.severityLevel === 'red',
+                          'bg-surface-container-low/70 hover:bg-surface-container-low border-l-4 border-l-amber-500': selectedIncident().id === incident.id && incident.severityLevel === 'amber',
+                          'bg-surface-container-low/50 hover:bg-surface-container-low border-l-4 border-l-blue-500': selectedIncident().id === incident.id && incident.severityLevel === 'blue',
+                          'hover:bg-surface-container-low': selectedIncident().id !== incident.id
+                        }">
+                        
+                        <!-- Incident ID -->
+                        <td
+                          class="p-3 pl-4 font-code-md text-code-md font-bold"
+                          [ngClass]="selectedIncident().id === incident.id ? 'text-primary' : 'text-secondary'">
+                          {{ incident.id }}
+                        </td>
+
+                        <!-- Severity Badge -->
+                        <td class="p-3">
+                          <span
+                            class="font-label-sm text-label-sm px-2 py-0.5 rounded font-bold uppercase inline-block"
+                            [ngClass]="{
+                              'bg-error-container text-on-error-container': incident.severityLevel === 'red',
+                              'bg-tertiary-fixed text-on-tertiary-fixed': incident.severityLevel === 'amber',
+                              'bg-surface-container-highest text-on-secondary-container': incident.severityLevel === 'blue'
+                            }">
+                            {{ incident.priorityCode }}
+                          </span>
+                        </td>
+
+                        <!-- Incident Title & Location -->
+                        <td class="p-3">
+                          <div class="flex flex-col">
+                            <span class="font-bold text-on-surface leading-tight">{{ incident.title }}</span>
+                            <span class="text-secondary text-[12px] flex items-center gap-1 mt-0.5">
+                              <span class="material-symbols-outlined text-[14px]">location_on</span>
+                              {{ incident.location.address }}
+                            </span>
+                          </div>
+                        </td>
+
+                        <!-- Elapsed Time -->
+                        <td class="p-3 font-code-md text-code-md font-semibold text-secondary">
+                          {{ incident.elapsed }}
+                        </td>
+
+                        <!-- Units Summary Badge -->
+                        <td class="p-3">
+                          <span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">
+                            {{ incident.unitsSummary }}
+                          </span>
+                        </td>
+
+                        <!-- Operational Stage -->
+                        <td class="p-3">
+                          <span
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label-sm text-label-sm uppercase font-bold"
+                            [ngClass]="{
+                              'bg-error-container/30 text-primary': incident.stage.toLowerCase().includes('suppression'),
+                              'bg-surface-container-high text-on-surface': incident.stage.toLowerCase().includes('route'),
+                              'bg-tertiary-fixed-dim/30 text-tertiary': incident.stage.toLowerCase().includes('containment'),
+                              'bg-surface-container text-secondary': !incident.stage.toLowerCase().includes('suppression') && !incident.stage.toLowerCase().includes('route') && !incident.stage.toLowerCase().includes('containment')
+                            }">
+                            @if (incident.stage.toLowerCase().includes('suppression')) {
+                              <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                            } @else {
+                              <span class="w-1.5 h-1.5 rounded-full bg-on-surface/50"></span>
+                            }
+                            {{ incident.stage }}
+                          </span>
+                        </td>
+
+                        <!-- Action Buttons -->
+                        <td class="p-3 pr-4 text-right">
+                          <div class="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              (click)="selectIncident(incident); $event.stopPropagation()"
+                              class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded font-label-sm text-label-sm uppercase font-bold transition-all">
+                              @if (selectedIncident().id === incident.id) { Active } @else { Inspect }
+                            </button>
+                            <button
+                              type="button"
+                              (click)="selectIncident(incident); $event.stopPropagation()"
+                              class="text-secondary hover:text-on-surface p-1">
+                              <span class="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+                          </div>
+                        </td>
+
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination Footer -->
+              <div class="px-space-md py-3 bg-surface-container-low border-t border-surface-container-high flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+                <div class="text-secondary font-label-sm text-label-sm">
+                  Showing <span class="font-bold text-on-surface">1-{{ filteredIncidents().length }}</span> of <span class="font-bold text-on-surface">{{ incidents().length }}</span> Active Records
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="px-3 py-1 rounded bg-surface-container-lowest border border-surface-container-highest text-secondary text-label-sm font-label-sm font-bold opacity-50 cursor-not-allowed">
+                    Prev
+                  </button>
+                  <span class="px-3 py-1 font-code-md text-code-md text-secondary">Page 1 of 1</span>
+                  <button class="px-3 py-1 rounded bg-surface-container-lowest border border-surface-container-highest text-secondary text-label-sm font-label-sm font-bold opacity-50 cursor-not-allowed">
+                    Next
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Side Column: Detail Inspector & Command Override Panel (4 cols on XL) -->
+          <div class="col-span-12 xl:col-span-4 flex flex-col gap-space-md">
+            
+            <!-- Selected Incident Overview & Stage Progress Card -->
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md">
+              <div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high">
+                <div class="flex items-center gap-2">
+                  <span class="bg-primary text-on-primary px-2 py-0.5 rounded font-label-sm text-label-sm font-black uppercase">Active Focus</span>
+                  <span class="font-code-md text-code-md font-bold text-primary">{{ selectedIncident().id }}</span>
+                </div>
+                <span
+                  class="font-label-sm text-label-sm px-2 py-0.5 rounded font-bold uppercase"
+                  [ngClass]="{
+                    'bg-error-container text-on-error-container': selectedIncident().severityLevel === 'red',
+                    'bg-tertiary-fixed text-on-tertiary-fixed': selectedIncident().severityLevel === 'amber',
+                    'bg-surface-container-highest text-on-secondary-container': selectedIncident().severityLevel === 'blue'
+                  }">
+                  {{ selectedIncident().priorityCode }}
+                </span>
+              </div>
+
+              <!-- Title & Meta -->
+              <div class="mt-3">
+                <h3 class="font-title-md text-title-md font-extrabold uppercase text-on-surface">
+                  {{ selectedIncident().title }}
+                </h3>
+                <p class="font-body-sm text-body-sm text-secondary mt-1">
+                  {{ selectedIncident().location.address }} • {{ selectedIncident().subCategory || selectedIncident().category }}
+                </p>
+                <p class="font-body-sm text-body-sm text-on-surface/80 mt-2 bg-surface-container-low p-2 rounded border border-surface-container-high">
+                  {{ selectedIncident().description }}
+                </p>
+              </div>
+
+              <!-- Operational Stage Progression -->
+              <div class="mt-space-md">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">Operational Progress</span>
+                  <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">
+                    Stage {{ selectedIncident().stageProgress.currentStep }} of {{ selectedIncident().stageProgress.totalSteps }}
+                  </span>
+                </div>
+
+                <div class="flex flex-col gap-2 relative pl-4 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
+                  @for (stage of selectedIncident().stageProgress.stages; track stage.step) {
+                    <div class="flex items-start gap-2 relative" [class.opacity-50]="stage.state === 'pending'">
+                      @if (stage.state === 'active') {
+                        <span class="w-3 h-3 rounded-full bg-primary animate-ping -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                        <div class="flex-1 flex items-center justify-between bg-error-container/20 p-1.5 rounded">
+                          <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">{{ stage.label }}</span>
+                          <span class="font-code-md text-code-md text-primary font-bold text-[11px]">{{ stage.time }}</span>
+                        </div>
+                      } @else if (stage.state === 'completed') {
+                        <span class="w-3 h-3 rounded-full bg-primary -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                        <div class="flex-1 flex items-center justify-between">
+                          <span class="font-label-sm text-label-sm font-bold text-on-surface">{{ stage.label }}</span>
+                          <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
+                        </div>
+                      } @else {
+                        <span class="w-3 h-3 rounded-full bg-surface-container-highest -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                        <div class="flex-1 flex items-center justify-between">
+                          <span class="font-label-sm text-label-sm font-semibold text-secondary">{{ stage.label }}</span>
+                          <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Deployed Responders Checklist -->
+              <div class="mt-space-md pt-space-sm border-t border-surface-container-high">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">
+                    Engaged Units ({{ selectedIncident().assignedUnits.length }} Active)
+                  </span>
+                  <span class="font-code-md text-code-md text-secondary text-[11px]">
+                    {{ selectedIncident().location.sector || 'SEC-4' }}
+                  </span>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  @for (unit of selectedIncident().assignedUnits; track unit.id) {
+                    <div class="flex items-center justify-between p-2 bg-surface-container-low rounded-lg">
+                      <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">
+                          {{ unit.icon || 'shield' }}
+                        </span>
+                        <span class="font-label-md text-label-md font-bold text-on-surface">{{ unit.name }}</span>
+                      </div>
+                      <span class="font-label-sm text-label-sm bg-primary text-on-primary px-2 py-0.5 rounded font-bold uppercase">
+                        {{ unit.roleBadge || 'Engaged' }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Streamlined Commander Override Actions Card -->
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">security</span>
+                  <h4 class="font-title-md text-title-md font-extrabold uppercase text-on-surface">
+                    Commander Tactical Controls
+                  </h4>
+                </div>
+                <span class="font-label-sm text-label-sm text-emerald-600 font-bold uppercase">Auth: Cmdr Collins</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <!-- Mutual Aid Button -->
+                <button
+                  type="button"
+                  (click)="triggerMutualAid()"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg bg-surface-container-low hover:bg-surface-container-highest text-on-surface border border-surface-container-highest transition-all text-center group active:scale-95">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary group-hover:scale-110 transition-transform">
+                    share_location
+                  </span>
+                  <span class="font-label-md text-label-md font-bold uppercase mt-1 leading-tight text-on-surface">Mutual Aid</span>
+                  <span class="font-label-sm text-label-sm text-secondary mt-0.5">Request Units</span>
+                </button>
+
+                <!-- Sound Siren Button -->
+                <button
+                  type="button"
+                  (click)="triggerSoundSiren()"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary shadow-sm active:translate-y-0.5 transition-all text-center group active:scale-95">
+                  <span class="material-symbols-outlined text-[20px] text-on-primary group-hover:scale-110 transition-transform">
+                    campaign
+                  </span>
+                  <span class="font-label-md text-label-md font-bold uppercase mt-1 leading-tight text-on-primary">Sound Siren</span>
+                  <span class="font-label-sm text-label-sm text-on-primary/80 mt-0.5">Sector 4 Alert</span>
+                </button>
+
+                <!-- Escalate Button -->
+                <button
+                  type="button"
+                  (click)="triggerEscalate()"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg bg-surface-container-low hover:bg-surface-container-highest text-on-surface border border-surface-container-highest transition-all text-center group active:scale-95">
+                  <span class="material-symbols-outlined text-[20px] text-primary group-hover:scale-110 transition-transform">
+                    priority_high
+                  </span>
+                  <span class="font-label-md text-label-md font-bold uppercase mt-1 leading-tight text-on-surface">Escalate</span>
+                  <span class="font-label-sm text-label-sm text-secondary mt-0.5">Code Black</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- =====================================================================
+         VIEW 2: SUBMIT EMERGENCY DISPATCH REQUEST FORM
+         ===================================================================== -->
+    @if (currentView() === 'dispatch') {
+      <div class="p-gutter max-w-7xl mx-auto flex flex-col gap-space-lg">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          
+          <!-- LEFT COLUMN: Form Execution (7 cols ~ 58%) -->
+          <section class="lg:col-span-7 flex flex-col gap-space-lg">
+            
+            <!-- Header Banner Card -->
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-xs">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="bg-error-container text-on-error-container px-2.5 py-1 rounded font-label-sm text-label-sm uppercase tracking-widest font-bold flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+                  Priority Queue Level 1
+                </span>
+                <span class="font-code-md text-code-md text-secondary tracking-widest uppercase">
+                  DISPATCH PROTOCOL: MIL-STD-188
+                </span>
+              </div>
+              <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight mt-1">
+                SUBMIT EMERGENCY DISPATCH REQUEST
+              </h1>
+              <p class="font-body-md text-body-md text-secondary">
+                High-urgency omni-channel dispatch queue. Submissions immediately trigger alert sirens and tactical telemetry feeds across nearest operational units.
+              </p>
+            </div>
+
+            <!-- STEP 1: Severity Level -->
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-md">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="w-6 h-6 rounded bg-on-surface text-surface flex items-center justify-center font-label-sm text-label-sm font-bold">
+                    01
+                  </span>
+                  <h2 class="font-title-md text-title-md uppercase tracking-wider text-on-surface font-bold">
+                    INCIDENT SEVERITY LEVEL
+                  </h2>
+                </div>
+                <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">* Mandatory Field</span>
+              </div>
+
+              <!-- 3 Severity Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm">
+                
+                <!-- Code Red Option -->
+                <div
+                  (click)="setFormSeverity('red')"
+                  class="cursor-pointer relative p-space-md rounded-lg flex flex-col justify-between transition-all duration-150 select-none"
+                  [ngClass]="dispatchForm().severity === 'red' ? 'bg-error-container/20 ring-2 ring-primary' : 'bg-surface-container hover:bg-surface-container-high'">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-label-sm text-label-sm uppercase tracking-widest font-bold text-primary">PRIORITY 1</span>
+                    <span class="w-3 h-3 rounded-full bg-primary" [class.animate-ping]="dispatchForm().severity === 'red'"></span>
+                  </div>
+                  <div>
+                    <span class="font-headline-md text-headline-md font-bold text-on-surface block">CODE RED</span>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">Life-Threatening / Catastrophic</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t border-surface-container-high font-label-sm text-label-sm text-primary font-semibold uppercase">
+                    FLASH DISPATCH
+                  </div>
+                </div>
+
+                <!-- Code Amber Option -->
+                <div
+                  (click)="setFormSeverity('amber')"
+                  class="cursor-pointer relative p-space-md rounded-lg flex flex-col justify-between transition-all duration-150 select-none"
+                  [ngClass]="dispatchForm().severity === 'amber' ? 'bg-tertiary-fixed/30 ring-2 ring-tertiary' : 'bg-surface-container hover:bg-surface-container-high'">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-label-sm text-label-sm uppercase tracking-widest font-bold text-tertiary">PRIORITY 2</span>
+                    <span class="w-3 h-3 rounded-full bg-tertiary"></span>
+                  </div>
+                  <div>
+                    <span class="font-headline-md text-headline-md font-bold text-on-surface block">CODE AMBER</span>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">Severe Hazard / High Escalation</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t border-surface-container-high font-label-sm text-label-sm text-tertiary font-semibold uppercase">
+                    RAPID RESPONSE
+                  </div>
+                </div>
+
+                <!-- Code Blue Option -->
+                <div
+                  (click)="setFormSeverity('blue')"
+                  class="cursor-pointer relative p-space-md rounded-lg flex flex-col justify-between transition-all duration-150 select-none"
+                  [ngClass]="dispatchForm().severity === 'blue' ? 'bg-surface-container-highest ring-2 ring-secondary' : 'bg-surface-container hover:bg-surface-container-high'">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-label-sm text-label-sm uppercase tracking-widest font-bold text-secondary">PRIORITY 3</span>
+                    <span class="w-3 h-3 rounded-full bg-secondary"></span>
+                  </div>
+                  <div>
+                    <span class="font-headline-md text-headline-md font-bold text-on-surface block">CODE BLUE</span>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">Contained / Support Required</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t border-surface-container-high font-label-sm text-label-sm text-secondary font-semibold uppercase">
+                    STAGED UNITS
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- STEP 2: Emergency Category -->
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-md">
+              <div class="flex items-center justify-between border-b border-surface-container pb-2">
+                <div class="flex items-center gap-space-sm">
+                  <span class="w-6 h-6 rounded bg-on-surface text-surface flex items-center justify-center font-label-sm text-label-sm font-bold">
+                    02
+                  </span>
+                  <h2 class="font-title-md text-title-md uppercase tracking-wider text-on-surface font-bold">
+                    EMERGENCY CLASSIFICATION
+                  </h2>
+                </div>
+                <span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">
+                  PRIMARY TYPE
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                <!-- Incident Category -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold" for="primary-category">
+                    Incident Category
+                  </label>
+                  <div class="relative">
+                    <select
+                      id="primary-category"
+                      [(ngModel)]="dispatchForm().category"
+                      class="w-full h-11 px-3 bg-surface-container-low border border-outline-variant text-on-surface rounded font-body-md text-body-md appearance-none focus:outline-none focus:border-primary cursor-pointer">
+                      <option value="hazmat">HazMat Spill / Airborne Contaminant</option>
+                      <option value="wildfire">Wildfire / Structural Fire</option>
+                      <option value="flood">Flash Flood / Water Rescue</option>
+                      <option value="medical">Mass Casualty / Medical Emergency</option>
+                      <option value="grid">Grid Failure / Critical Infrastructure</option>
+                    </select>
+                    <span class="material-symbols-outlined pointer-events-none absolute right-3 top-2.5 text-secondary">expand_more</span>
+                  </div>
+                </div>
+
+                <!-- Specific Sub-Classification -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold" for="subcat-select">
+                    Specific Sub-Classification
+                  </label>
+                  <div class="relative">
+                    <select
+                      id="subcat-select"
+                      [(ngModel)]="dispatchForm().subCategory"
+                      class="w-full h-11 px-3 bg-surface-container-low border border-outline-variant text-on-surface rounded font-body-md text-body-md appearance-none focus:outline-none focus:border-primary cursor-pointer">
+                      <option value="chem-tox">HazMat - Airborne Toxic Gas Dispersion</option>
+                      <option value="chem-leak">HazMat - Liquid Chemical Runoff / Spill</option>
+                      <option value="wf-urban">Wildfire - Urban Interface / Structure Threat</option>
+                      <option value="med-mci">Mass Casualty - Multi-Vehicle Highway Collision</option>
+                      <option value="infra-sub">Critical Infrastructure - Substation Fire</option>
+                    </select>
+                    <span class="material-symbols-outlined pointer-events-none absolute right-3 top-2.5 text-secondary">expand_more</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 3: Incident Details Form -->
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-md">
+              <div class="flex items-center justify-between border-b border-surface-container pb-2">
+                <div class="flex items-center gap-space-sm">
+                  <span class="w-6 h-6 rounded bg-on-surface text-surface flex items-center justify-center font-label-sm text-label-sm font-bold">
+                    03
+                  </span>
+                  <h2 class="font-title-md text-title-md uppercase tracking-wider text-on-surface font-bold">
+                    INCIDENT PARTICULARS
+                  </h2>
+                </div>
+                <span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+                  Operational Details
+                </span>
+              </div>
+
+              <!-- Headline -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                  Incident Callout Headline
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="dispatchForm().calloutHeadline"
+                  class="h-11 px-3 bg-surface-container-low border border-outline-variant text-on-surface rounded font-body-md text-body-md focus:outline-none focus:border-primary" />
+              </div>
+
+              <!-- Description -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                  Field Description &amp; Observations
+                </label>
+                <textarea
+                  rows="3"
+                  [(ngModel)]="dispatchForm().fieldDescription"
+                  class="w-full p-3 bg-surface-container-low border border-outline-variant text-on-surface rounded font-body-md text-body-md focus:outline-none focus:border-primary"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-1">
+                <!-- Casualties Counter -->
+                <div class="flex flex-col gap-2 p-space-sm bg-surface-container-low border border-outline-variant rounded-lg">
+                  <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                    Confirmed Victims / Casualties
+                  </span>
+                  <div class="flex items-center justify-between px-2">
+                    <button
+                      type="button"
+                      (click)="updateCasualties(-1)"
+                      class="w-10 h-10 rounded bg-surface-container text-on-surface flex items-center justify-center font-headline-sm hover:bg-surface-container-high active:scale-95 transition-all">
+                      <span class="material-symbols-outlined">remove</span>
+                    </button>
+                    <div class="flex flex-col items-center">
+                      <span class="font-display-lg text-display-lg text-primary font-bold leading-none">
+                        {{ dispatchForm().confirmedCasualties < 10 ? '0' + dispatchForm().confirmedCasualties : dispatchForm().confirmedCasualties }}
+                      </span>
+                      <span class="font-label-sm text-label-sm uppercase text-secondary font-semibold">
+                        Persons Confirmed
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="updateCasualties(1)"
+                      class="w-10 h-10 rounded bg-surface-container text-on-surface flex items-center justify-center font-headline-sm hover:bg-surface-container-high active:scale-95 transition-all">
+                      <span class="material-symbols-outlined">add</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Dynamic Hazards Checkboxes -->
+                <div class="flex flex-col gap-2 p-space-sm bg-surface-container-low border border-outline-variant rounded-lg">
+                  <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                    Active Dynamic Hazards
+                  </span>
+                  <div class="grid grid-cols-2 gap-2 font-label-sm text-label-sm pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-on-surface select-none">
+                      <input
+                        type="checkbox"
+                        [checked]="dispatchForm().hazards.flammables"
+                        (change)="toggleHazard('flammables')"
+                        class="w-4 h-4 accent-primary rounded cursor-pointer" />
+                      <span>Flammables</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-on-surface select-none">
+                      <input
+                        type="checkbox"
+                        [checked]="dispatchForm().hazards.powerlinesDown"
+                        (change)="toggleHazard('powerlinesDown')"
+                        class="w-4 h-4 accent-primary rounded cursor-pointer" />
+                      <span>Powerlines Down</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-on-surface select-none">
+                      <input
+                        type="checkbox"
+                        [checked]="dispatchForm().hazards.blockedRoads"
+                        (change)="toggleHazard('blockedRoads')"
+                        class="w-4 h-4 accent-primary rounded cursor-pointer" />
+                      <span>Blocked Roads</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-on-surface select-none">
+                      <input
+                        type="checkbox"
+                        [checked]="dispatchForm().hazards.structuralCollapse"
+                        (change)="toggleHazard('structuralCollapse')"
+                        class="w-4 h-4 accent-primary rounded cursor-pointer" />
+                      <span>Structural Collapse</span>
+                    </label>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SUBMIT COMMAND BAR -->
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-xl flex flex-col gap-space-md border border-outline-variant">
+              <div class="flex items-center gap-space-sm">
+                <input
+                  type="checkbox"
+                  id="silent-mode"
+                  [(ngModel)]="dispatchForm().silentMode"
+                  class="w-5 h-5 accent-on-surface rounded cursor-pointer" />
+                <label for="silent-mode" class="font-body-md text-body-md text-on-surface cursor-pointer select-none font-semibold">
+                  Execute Silent / Covert Response Routing (Mute local broadcast sirens)
+                </label>
+              </div>
+
+              <!-- Transmit Dispatch Button -->
+              <button
+                type="button"
+                (click)="submitDispatch()"
+                class="w-full bg-primary hover:bg-primary-container text-on-primary py-4 px-space-lg rounded-lg font-title-md text-title-md font-bold uppercase tracking-wider shadow-lg flex items-center justify-center gap-space-sm transition-all transform active:scale-[0.99] cursor-pointer">
+                <span class="material-symbols-outlined text-[26px] animate-pulse" style="font-variation-settings: 'FILL' 1;">
+                  emergency_home
+                </span>
+                <span>TRANSMIT DISPATCH &amp; ALERT SECTOR UNITS</span>
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+              </button>
+
+              <div class="flex items-center justify-between text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">timer</span>
+                  EXPECTED BROADCAST LATENCY: &lt; 250ms
+                </span>
+                <span class="text-primary font-bold">ALL RADIOS ESCALATION ENABLED</span>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- RIGHT COLUMN: Tactical Map & Pinpoint Geo-locator (5 cols ~ 42%) -->
+          <aside class="lg:col-span-5 flex flex-col gap-space-md lg:sticky lg:top-20">
+            
+            <!-- Tactical Geo-Pin Card -->
+            <div class="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col border border-outline-variant">
+              <div class="bg-[#0B1325] text-on-primary px-space-md py-space-sm flex items-center justify-between border-b border-[#1E293B]">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[18px] text-[#38BDF8]">pin_drop</span>
+                  <span class="font-label-lg text-label-lg uppercase font-bold tracking-wider">TACTICAL TARGET GEO-PIN</span>
+                </div>
+                <span class="font-code-md text-code-md text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  GNSS LOCK
+                </span>
+              </div>
+
+              <!-- Tactical Grid Reticle View -->
+              <div class="relative w-full h-[220px] bg-[#070D1B] overflow-hidden select-none flex items-center justify-center">
+                <!-- Grid background lines -->
+                <svg class="absolute inset-0 w-full h-full opacity-40 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="clean-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#38BDF8" stroke-width="0.75" stroke-dasharray="1 3"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#clean-grid)"/>
+                </svg>
+
+                <!-- Center Crosshair & Pulse Circles -->
+                <div class="relative flex items-center justify-center">
+                  <div class="w-36 h-36 rounded-full border border-primary/30 animate-ping absolute"></div>
+                  <div class="w-24 h-24 rounded-full border border-[#38BDF8]/40 absolute"></div>
+                  <div class="w-8 h-8 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center shadow-lg">
+                    <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                  </div>
+                </div>
+
+                <!-- Overlay Telemetry -->
+                <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px] font-code-md text-cyan-300 bg-[#0B1325]/90 px-2 py-1 rounded border border-[#1E293B]">
+                  <span>LAT/LNG: {{ dispatchForm().targetCoordinates }}</span>
+                  <span class="text-emerald-400 font-bold">HDOP 0.8 // ACC ±1.2m</span>
+                </div>
+              </div>
+
+              <!-- Location Input / Metadata -->
+              <div class="p-space-md flex flex-col gap-2">
+                <div class="flex flex-col gap-1">
+                  <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                    Target Address
+                  </span>
+                  <input
+                    type="text"
+                    [(ngModel)]="dispatchForm().targetAddress"
+                    class="h-9 px-2.5 bg-surface-container-low border border-outline-variant text-on-surface rounded font-body-sm text-body-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div class="flex items-center justify-between text-secondary font-code-md text-code-md text-[12px] pt-1">
+                  <span>{{ dispatchForm().targetSector }}</span>
+                  <button
+                    type="button"
+                    (click)="showToast('GEO-POSITION RE-CALIBRATED: TARGET PIN CENTERED', 'success')"
+                    class="text-primary hover:underline font-bold uppercase text-[11px]">
+                    Re-Center Pin
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Nearby Responding Units Suggested for Dispatch -->
+            <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md border border-outline-variant flex flex-col gap-space-sm">
+              <div class="flex items-center justify-between pb-2 border-b border-surface-container-high">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[18px]">emergency_share</span>
+                  <h3 class="font-title-md text-title-md font-bold uppercase text-on-surface">
+                    Recommended Units ({{ availableUnits().length }})
+                  </h3>
+                </div>
+                <span class="font-label-sm text-label-sm text-secondary font-semibold">
+                  {{ dispatchForm().selectedUnits.length }} Selected
+                </span>
+              </div>
+
+              <div class="flex flex-col gap-2 mt-1">
+                @for (unit of availableUnits(); track unit.id) {
+                  <div
+                    (click)="toggleUnitSelection(unit.id)"
+                    class="flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none"
+                    [ngClass]="dispatchForm().selectedUnits.includes(unit.id) ? 'bg-error-container/15 border-primary shadow-xs' : 'bg-surface-container-low border-surface-container-high hover:bg-surface-container'">
+                    <div class="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        [checked]="dispatchForm().selectedUnits.includes(unit.id)"
+                        (click)="$event.stopPropagation()"
+                        (change)="toggleUnitSelection(unit.id)"
+                        class="w-4 h-4 accent-primary rounded cursor-pointer" />
+                      <div class="flex flex-col">
+                        <span class="font-label-md text-label-md font-bold text-on-surface">{{ unit.name }}</span>
+                        <span class="text-secondary text-[11px]">{{ unit.leadOfficer }} • {{ unit.roleBadge || unit.type }}</span>
+                      </div>
+                    </div>
+                    <span
+                      class="font-label-sm text-label-sm px-2 py-0.5 rounded font-bold uppercase text-[11px]"
+                      [ngClass]="unit.isEngaged ? 'bg-primary text-on-primary' : 'bg-surface-container text-secondary'">
+                      {{ unit.isEngaged ? 'On Scene' : 'Staged' }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+
+          </aside>
+
+        </div>
+
+      </div>
+    }
+
+  </main>
+</div>

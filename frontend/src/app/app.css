@@ -1,0 +1,18 @@
+/* Component level styles for ResQNet tactical command */
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* Severity card transitions */
+.severity-card {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Material Symbols vertical alignment */
+.material-symbols-outlined {
+  vertical-align: middle;
+}

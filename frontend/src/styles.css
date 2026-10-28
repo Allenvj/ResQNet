@@ -1,0 +1,106 @@
+/* ==========================================================================
+   ResQNet Tactical Response & Incident Command System
+   Design System Tokens Extracted from Google Stitch Wireframe Payload
+   ========================================================================== */
+
+:root {
+  /* Colors from Stitch Design Token Payload */
+  --color-surface: #faf8ff;
+  --color-surface-dim: #d2d9f4;
+  --color-surface-bright: #faf8ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container: #eaedff;
+  --color-surface-container-high: #e2e7ff;
+  --color-surface-container-highest: #dae2fd;
+  --color-on-surface: #131b2e;
+  --color-on-surface-variant: #5c403c;
+  --color-inverse-surface: #283044;
+  --color-inverse-on-surface: #eef0ff;
+  --color-outline: #916f6b;
+  --color-outline-variant: #e6bdb8;
+  --color-surface-tint: #bf0715;
+  --color-primary: #b70011;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #dc2626;
+  --color-on-primary-container: #fff6f5;
+  --color-inverse-primary: #ffb4ab;
+  --color-secondary: #565e73;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d8dff9;
+  --color-on-secondary-container: #5b6278;
+  --color-tertiary: #894900;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #ad5d00;
+  --color-on-tertiary-container: #fff6f2;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #ffdad6;
+  --color-primary-fixed-dim: #ffb4ab;
+  --color-secondary-fixed: #dbe2fb;
+  --color-secondary-fixed-dim: #bfc6df;
+  --color-tertiary-fixed: #ffdcc3;
+  --color-tertiary-fixed-dim: #ffb77d;
+  --color-background: #faf8ff;
+  --color-on-background: #131b2e;
+  --color-surface-variant: #dae2fd;
+
+  /* Tactical Dark Navy Sidebar Palette */
+  --navy-sidebar-bg: #0B1325;
+  --navy-sidebar-border: #1E293B;
+  --navy-sidebar-card: #070D1A;
+  --navy-header-bg: #0B1325;
+  --navy-header-pill: #131E36;
+  --navy-text-muted: #94A3B8;
+  --navy-text-dim: #64748B;
+  --navy-text-light: #CBD5E1;
+  --navy-text-bright: #F1F5F9;
+  --navy-accent-cyan: #38BDF8;
+
+  /* Typography */
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: var(--font-inter);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Symbols icon settings */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+}
+
+/* Hide scrollbar while preserving scrolling */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
