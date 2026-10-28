@@ -376,16 +376,16 @@
                         (click)="selectIncident(incident)"
                         class="transition-colors cursor-pointer"
                         [ngClass]="{
-                          'bg-error-container/20 hover:bg-error-container/30 border-l-4 border-l-primary': selectedIncident().id === incident.id && incident.severityLevel === 'red',
-                          'bg-surface-container-low/70 hover:bg-surface-container-low border-l-4 border-l-amber-500': selectedIncident().id === incident.id && incident.severityLevel === 'amber',
-                          'bg-surface-container-low/50 hover:bg-surface-container-low border-l-4 border-l-blue-500': selectedIncident().id === incident.id && incident.severityLevel === 'blue',
-                          'hover:bg-surface-container-low': selectedIncident().id !== incident.id
+                          'bg-error-container/20 hover:bg-error-container/30 border-l-4 border-l-primary': selectedIncident()?.id === incident.id && incident.severityLevel === 'red',
+                          'bg-surface-container-low/70 hover:bg-surface-container-low border-l-4 border-l-amber-500': selectedIncident()?.id === incident.id && incident.severityLevel === 'amber',
+                          'bg-surface-container-low/50 hover:bg-surface-container-low border-l-4 border-l-blue-500': selectedIncident()?.id === incident.id && incident.severityLevel === 'blue',
+                          'hover:bg-surface-container-low': selectedIncident()?.id !== incident.id
                         }">
                         
                         <!-- Incident ID -->
                         <td
                           class="p-3 pl-4 font-code-md text-code-md font-bold"
-                          [ngClass]="selectedIncident().id === incident.id ? 'text-primary' : 'text-secondary'">
+                          [ngClass]="selectedIncident()?.id === incident.id ? 'text-primary' : 'text-secondary'">
                           {{ incident.id }}
                         </td>
 
@@ -451,7 +451,7 @@
                               type="button"
                               (click)="selectIncident(incident); $event.stopPropagation()"
                               class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded font-label-sm text-label-sm uppercase font-bold transition-all">
-                              @if (selectedIncident().id === incident.id) { Active } @else { Inspect }
+                              @if (selectedIncident()?.id === incident.id) { Active } @else { Inspect }
                             </button>
                             <button
                               type="button"
@@ -491,101 +491,109 @@
           <div class="col-span-12 xl:col-span-4 flex flex-col gap-space-md">
             
             <!-- Selected Incident Overview & Stage Progress Card -->
-            <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md">
-              <div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high">
-                <div class="flex items-center gap-2">
-                  <span class="bg-primary text-on-primary px-2 py-0.5 rounded font-label-sm text-label-sm font-black uppercase">Active Focus</span>
-                  <span class="font-code-md text-code-md font-bold text-primary">{{ selectedIncident().id }}</span>
-                </div>
-                <span
-                  class="font-label-sm text-label-sm px-2 py-0.5 rounded font-bold uppercase"
-                  [ngClass]="{
-                    'bg-error-container text-on-error-container': selectedIncident().severityLevel === 'red',
-                    'bg-tertiary-fixed text-on-tertiary-fixed': selectedIncident().severityLevel === 'amber',
-                    'bg-surface-container-highest text-on-secondary-container': selectedIncident().severityLevel === 'blue'
-                  }">
-                  {{ selectedIncident().priorityCode }}
-                </span>
-              </div>
-
-              <!-- Title & Meta -->
-              <div class="mt-3">
-                <h3 class="font-title-md text-title-md font-extrabold uppercase text-on-surface">
-                  {{ selectedIncident().title }}
-                </h3>
-                <p class="font-body-sm text-body-sm text-secondary mt-1">
-                  {{ selectedIncident().location.address }} • {{ selectedIncident().subCategory || selectedIncident().category }}
-                </p>
-                <p class="font-body-sm text-body-sm text-on-surface/80 mt-2 bg-surface-container-low p-2 rounded border border-surface-container-high">
-                  {{ selectedIncident().description }}
-                </p>
-              </div>
-
-              <!-- Operational Stage Progression -->
-              <div class="mt-space-md">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">Operational Progress</span>
-                  <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">
-                    Stage {{ selectedIncident().stageProgress.currentStep }} of {{ selectedIncident().stageProgress.totalSteps }}
+            @if (selectedIncident(); as sel) {
+              <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md">
+                <div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-primary text-on-primary px-2 py-0.5 rounded font-label-sm text-label-sm font-black uppercase">Active Focus</span>
+                    <span class="font-code-md text-code-md font-bold text-primary">{{ sel.id }}</span>
+                  </div>
+                  <span
+                    class="font-label-sm text-label-sm px-2 py-0.5 rounded font-bold uppercase"
+                    [ngClass]="{
+                      'bg-error-container text-on-error-container': sel.severityLevel === 'red',
+                      'bg-tertiary-fixed text-on-tertiary-fixed': sel.severityLevel === 'amber',
+                      'bg-surface-container-highest text-on-secondary-container': sel.severityLevel === 'blue'
+                    }">
+                    {{ sel.priorityCode }}
                   </span>
                 </div>
 
-                <div class="flex flex-col gap-2 relative pl-4 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
-                  @for (stage of selectedIncident().stageProgress.stages; track stage.step) {
-                    <div class="flex items-start gap-2 relative" [class.opacity-50]="stage.state === 'pending'">
-                      @if (stage.state === 'active') {
-                        <span class="w-3 h-3 rounded-full bg-primary animate-ping -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
-                        <div class="flex-1 flex items-center justify-between bg-error-container/20 p-1.5 rounded">
-                          <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">{{ stage.label }}</span>
-                          <span class="font-code-md text-code-md text-primary font-bold text-[11px]">{{ stage.time }}</span>
-                        </div>
-                      } @else if (stage.state === 'completed') {
-                        <span class="w-3 h-3 rounded-full bg-primary -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
-                        <div class="flex-1 flex items-center justify-between">
-                          <span class="font-label-sm text-label-sm font-bold text-on-surface">{{ stage.label }}</span>
-                          <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
-                        </div>
-                      } @else {
-                        <span class="w-3 h-3 rounded-full bg-surface-container-highest -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
-                        <div class="flex-1 flex items-center justify-between">
-                          <span class="font-label-sm text-label-sm font-semibold text-secondary">{{ stage.label }}</span>
-                          <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Deployed Responders Checklist -->
-              <div class="mt-space-md pt-space-sm border-t border-surface-container-high">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">
-                    Engaged Units ({{ selectedIncident().assignedUnits.length }} Active)
-                  </span>
-                  <span class="font-code-md text-code-md text-secondary text-[11px]">
-                    {{ selectedIncident().location.sector || 'SEC-4' }}
-                  </span>
+                <!-- Title & Meta -->
+                <div class="mt-3">
+                  <h3 class="font-title-md text-title-md font-extrabold uppercase text-on-surface">
+                    {{ sel.title }}
+                  </h3>
+                  <p class="font-body-sm text-body-sm text-secondary mt-1">
+                    {{ sel.location.address }} • {{ sel.subCategory || sel.category }}
+                  </p>
+                  <p class="font-body-sm text-body-sm text-on-surface/80 mt-2 bg-surface-container-low p-2 rounded border border-surface-container-high">
+                    {{ sel.description }}
+                  </p>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                  @for (unit of selectedIncident().assignedUnits; track unit.id) {
-                    <div class="flex items-center justify-between p-2 bg-surface-container-low rounded-lg">
-                      <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[18px] text-primary">
-                          {{ unit.icon || 'shield' }}
-                        </span>
-                        <span class="font-label-md text-label-md font-bold text-on-surface">{{ unit.name }}</span>
+                <!-- Operational Stage Progression -->
+                <div class="mt-space-md">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">Operational Progress</span>
+                    <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">
+                      Stage {{ sel.stageProgress.currentStep }} of {{ sel.stageProgress.totalSteps }}
+                    </span>
+                  </div>
+
+                  <div class="flex flex-col gap-2 relative pl-4 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
+                    @for (stage of sel.stageProgress.stages; track stage.step) {
+                      <div class="flex items-start gap-2 relative" [class.opacity-50]="stage.state === 'pending'">
+                        @if (stage.state === 'active') {
+                          <span class="w-3 h-3 rounded-full bg-primary animate-ping -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                          <div class="flex-1 flex items-center justify-between bg-error-container/20 p-1.5 rounded">
+                            <span class="font-label-sm text-label-sm font-extrabold text-primary uppercase">{{ stage.label }}</span>
+                            <span class="font-code-md text-code-md text-primary font-bold text-[11px]">{{ stage.time }}</span>
+                          </div>
+                        } @else if (stage.state === 'completed') {
+                          <span class="w-3 h-3 rounded-full bg-primary -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                          <div class="flex-1 flex items-center justify-between">
+                            <span class="font-label-sm text-label-sm font-bold text-on-surface">{{ stage.label }}</span>
+                            <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
+                          </div>
+                        } @else {
+                          <span class="w-3 h-3 rounded-full bg-surface-container-highest -ml-4 mt-1 ring-4 ring-surface-container-lowest"></span>
+                          <div class="flex-1 flex items-center justify-between">
+                            <span class="font-label-sm text-label-sm font-semibold text-secondary">{{ stage.label }}</span>
+                            <span class="font-code-md text-code-md text-secondary text-[11px]">{{ stage.time }}</span>
+                          </div>
+                        }
                       </div>
-                      <span class="font-label-sm text-label-sm bg-primary text-on-primary px-2 py-0.5 rounded font-bold uppercase">
-                        {{ unit.roleBadge || 'Engaged' }}
-                      </span>
-                    </div>
-                  }
+                    }
+                  </div>
                 </div>
-              </div>
 
-            </div>
+                <!-- Deployed Responders Checklist -->
+                <div class="mt-space-md pt-space-sm border-t border-surface-container-high">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-label-sm text-label-sm font-bold uppercase text-on-surface">
+                      Engaged Units ({{ sel.assignedUnits.length }} Active)
+                    </span>
+                    <span class="font-code-md text-code-md text-secondary text-[11px]">
+                      {{ sel.location.sector || 'SEC-4' }}
+                    </span>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    @for (unit of sel.assignedUnits; track unit.id) {
+                      <div class="flex items-center justify-between p-2 bg-surface-container-low rounded-lg">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[18px] text-primary">
+                            {{ unit.icon || 'shield' }}
+                          </span>
+                          <span class="font-label-md text-label-md font-bold text-on-surface">{{ unit.name }}</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm bg-primary text-on-primary px-2 py-0.5 rounded font-bold uppercase">
+                          {{ unit.roleBadge || 'Engaged' }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+              </div>
+            } @else {
+              <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md text-center text-secondary">
+                <span class="material-symbols-outlined text-4xl mb-2 text-secondary/60">radar</span>
+                <p class="font-label-md text-label-md font-bold uppercase text-on-surface">No Incident Selected</p>
+                <p class="font-body-sm text-body-sm text-secondary mt-1">Select any row from the roster to inspect operational telemetry.</p>
+              </div>
+            }
 
             <!-- Streamlined Commander Override Actions Card -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-high p-space-md">
